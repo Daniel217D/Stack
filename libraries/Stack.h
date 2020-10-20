@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-using std::cout;
-using std::string;
-using std::ifstream;
-using std::ofstream;
 using std::out_of_range;
 
 template<class Type>
