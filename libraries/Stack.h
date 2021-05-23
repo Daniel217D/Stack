@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <Windows.h>
 
 using std::out_of_range;
 
@@ -36,21 +37,48 @@ class Stack {
 private:
     Node<Type> *node = nullptr;
 
+    HANDLE hSemaphore;
+    const int cMax = 2;
+
+    void upSemaphore() {
+        WaitForSingleObject(hSemaphore, INFINITE);
+    }
+
+    void downSemaphore() {
+        ReleaseSemaphore(hSemaphore, 1, NULL);
+    }
 public:
+    Stack() {
+        hSemaphore = CreateSemaphore(NULL, cMax, cMax, NULL);
+    }
+
     ~Stack() {
         delete node;
     }
 
     bool is_empty() {
-        return node == nullptr;
+        upSemaphore();
+
+        bool result = node == nullptr;
+
+        downSemaphore();
+
+        return result;
     }
 
     void push(Type value) {
+        upSemaphore();
+
         node = new Node<Type>(value, node);
+
+        downSemaphore();
     }
 
     Type pop() {
+        upSemaphore();
+
         if (is_empty()) {
+            downSemaphore();
             throw out_of_range("Deque is empty");
         } else {
             Type value = node->value;
@@ -60,6 +88,7 @@ public:
             temp->next = nullptr;
             delete temp;
 
+            downSemaphore();
             return value;
         }
     }
