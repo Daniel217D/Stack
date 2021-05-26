@@ -38,7 +38,7 @@ private:
     Node<Type> *node = nullptr;
 
     HANDLE hSemaphore;
-    const int cMax = 2;
+    const int cMax = 1;
 
     void upSemaphore() {
         WaitForSingleObject(hSemaphore, INFINITE);
@@ -46,6 +46,10 @@ private:
 
     void downSemaphore() {
         ReleaseSemaphore(hSemaphore, 1, NULL);
+    }
+
+    bool _isEmpty() {
+        return node == nullptr;
     }
 public:
     Stack() {
@@ -56,10 +60,10 @@ public:
         delete node;
     }
 
-    bool is_empty() {
+    bool isEmpty() {
         upSemaphore();
 
-        bool result = node == nullptr;
+        bool result = _isEmpty();
 
         downSemaphore();
 
@@ -77,7 +81,7 @@ public:
     Type pop() {
         upSemaphore();
 
-        if (is_empty()) {
+        if (_isEmpty()) {
             downSemaphore();
             throw out_of_range("Deque is empty");
         } else {
